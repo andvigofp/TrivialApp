@@ -32,7 +32,7 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
             _score.value = value
         }
 
-    private val _record = mutableStateOf(loadRecord())
+    private val _record = mutableStateOf(0)
     val record: Int get() = _record.value
 
     private val _gameOver = mutableStateOf(false)
@@ -41,10 +41,7 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
     private val _answerShown = mutableStateOf(false)
     val answerShown: Boolean get() = _answerShown.value
 
-    init {
-        _record.value = loadRecord()
-    }
-
+    // Inicia el juego con un número específico de preguntas
     fun startGame(questionCount: Int) {
         _questions.clear()
         _questions.addAll(allQuestions.shuffled().take(questionCount))
@@ -55,11 +52,11 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
         _answerShown.value = false
     }
 
+    // Envía la respuesta seleccionada por el usuario
     fun submitAnswer(selectedIndex: Int) {
         val currentQuestion = questions[currentQuestionIndex]
 
         if (!_answerShown.value) {
-            // Incrementa la puntuación si la respuesta es correcta
             if (selectedIndex == currentQuestion.correctAnswerIndex) {
                 score++
             }
@@ -67,46 +64,26 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
         }
     }
 
+    // Avanza a la siguiente pregunta o finaliza el juego
     fun moveToNextQuestion() {
         if (currentQuestionIndex < questions.lastIndex) {
             currentQuestionIndex++
         } else {
             _gameOver.value = true
-            checkAndUpdateRecord()
+            checkAndUpdateRecord() // Actualiza el récord al final del juego
         }
-
         _answerShown.value = false
     }
 
-    private fun checkAndUpdateRecord() {
-        // Actualiza el récord solo si el puntaje es mayor
-        if (score > _record.value) {
-            _record.value = score
-            saveRecord(score)
+    // Método público para actualizar el récord
+    fun checkAndUpdateRecord(percentage: Int = (score * 100 / totalQuestions).coerceAtLeast(0)) {
+        if (percentage > _record.value) {
+            _record.value = percentage
         }
-    }
-
-    // Método para actualizar el récord si la puntuación es mayor
-    fun updateRecordIfNeeded() {
-        if (score > _record.value) {
-            _record.value = score
-            saveRecord(score)  // Guardamos el nuevo récord
-        }
-    }
-
-    private fun saveRecord(record: Int) {
-        val sharedPref = context.getSharedPreferences("TrivialAppPrefs", Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putInt("record", record)
-            apply()
-        }
-    }
-
-    private fun loadRecord(): Int {
-        val sharedPref = context.getSharedPreferences("TrivialAppPrefs", Context.MODE_PRIVATE)
-        return sharedPref.getInt("record", 0)
     }
 }
+
+
 
 
 

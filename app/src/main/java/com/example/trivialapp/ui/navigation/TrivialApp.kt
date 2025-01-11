@@ -29,8 +29,7 @@ fun TrivialApp(viewModel: TrivialViewModel = viewModel()) {
             GameScreen(
                 viewModel = viewModel,
                 onGameOver = {
-                    // Asegúrate de actualizar el récord antes de ir a GameOverScreen
-                    viewModel.updateRecordIfNeeded()  // Actualiza el récord en el ViewModel
+                    // Navega a la pantalla de Game Over
                     navController.navigate(TrivialScreen.GameOver.name)
                 }
             )
@@ -39,15 +38,13 @@ fun TrivialApp(viewModel: TrivialViewModel = viewModel()) {
             GameOverScreen(
                 viewModel = viewModel,
                 onHome = {
-                    // Actualiza el récord aquí también si es necesario antes de navegar a Home
-                    viewModel.updateRecordIfNeeded()
                     navController.navigate(TrivialScreen.Home.name) {
                         popUpTo(TrivialScreen.Home.name) { inclusive = true }
                     }
                 },
                 onReplay = {
-                    // Reinicia el juego y navega a Game
-                    viewModel.startGame(viewModel.totalQuestions)  // Reinicia el juego
+                    // Reinicia el juego y navega a la pantalla de juego
+                    viewModel.startGame(viewModel.totalQuestions) // Reinicia el juego con la misma cantidad de preguntas
                     navController.navigate(TrivialScreen.Game.name) {
                         popUpTo(TrivialScreen.GameOver.name) { inclusive = true }
                     }
@@ -56,6 +53,7 @@ fun TrivialApp(viewModel: TrivialViewModel = viewModel()) {
         }
     }
 }
+
 
 
 

@@ -21,11 +21,15 @@ fun GameOverScreen(
     onHome: () -> Unit,
     onReplay: () -> Unit
 ) {
+    // Calcula el porcentaje final de aciertos
     val finalScorePercentage = if (viewModel.totalQuestions > 0) {
         (viewModel.score * 100) / viewModel.totalQuestions
     } else {
         0
     }
+
+    // Actualiza el récord si es necesario
+    viewModel.checkAndUpdateRecord(finalScorePercentage)
 
     // Limitar el porcentaje entre 0 y 100
     val clampedScore = finalScorePercentage.coerceIn(0, 100)
@@ -49,22 +53,32 @@ fun GameOverScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
-        // Definir un color más oscuro para el fondo
+        // Color de fondo para el porcentaje
         val lilacBackgroundColor = Color(0xFF8A4D92) // Lila claro
         val textColor = Color.White // Letras en blanco
 
         Text(
             text = "Puntuación final: $clampedScore%",
             style = MaterialTheme.typography.bodyLarge,
-            color = textColor, // Cambiar el color del texto a blanco
+            color = textColor,
             modifier = Modifier
-                .background(lilacBackgroundColor) // Color de fondo oscuro
-                .padding(8.dp) // Un poco de relleno alrededor del texto
+                .background(lilacBackgroundColor)
+                .padding(8.dp)
+        )
+
+        // Muestra el récord actualizado
+        Text(
+            text = "Récord: ${viewModel.record}%",
+            style = MaterialTheme.typography.bodyLarge,
+            color = scoreColor
         )
 
         // Botón para ir al inicio
         Button(
-            onClick = { onHome() },
+            onClick = {
+                viewModel.checkAndUpdateRecord(clampedScore) // Asegura que el récord esté actualizado
+                onHome()
+            },
             modifier = Modifier.padding(top = 16.dp)
         ) {
             Text(text = "Inicio")
@@ -79,5 +93,6 @@ fun GameOverScreen(
         }
     }
 }
+
 
 
