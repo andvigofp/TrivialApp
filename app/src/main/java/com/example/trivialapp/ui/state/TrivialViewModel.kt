@@ -8,15 +8,19 @@ import com.example.trivialapp.data.QuestionDataSource
 import com.example.trivialapp.model.Question
 
 
+
+
 class TrivialViewModel(private val context: Context) : ViewModel() {
 
-    private val allQuestions = QuestionDataSource.questions.shuffled()
-
     private val _questions = SnapshotStateList<Question>()
+    val questionsMutable: SnapshotStateList<Question> get() = _questions
     val questions: List<Question> get() = _questions
 
     private val _totalQuestions = mutableStateOf(0)
     val totalQuestions: Int get() = _totalQuestions.value
+    fun updateTotalQuestions(value: Int) {
+        _totalQuestions.value = value
+    }
 
     private val _currentQuestionIndex = mutableStateOf(0)
     var currentQuestionIndex: Int
@@ -24,6 +28,9 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
         private set(value) {
             _currentQuestionIndex.value = value
         }
+    fun updateCurrentQuestionIndex(value: Int) {
+        _currentQuestionIndex.value = value
+    }
 
     private val _score = mutableStateOf(0)
     var score: Int
@@ -31,57 +38,39 @@ class TrivialViewModel(private val context: Context) : ViewModel() {
         private set(value) {
             _score.value = value
         }
+    fun updateScore(value: Int) {
+        _score.value = value
+    }
 
     private val _record = mutableStateOf(0)
     val record: Int get() = _record.value
+    fun updateRecord(value: Int) {
+        _record.value = value
+    }
 
     private val _gameOver = mutableStateOf(false)
     val gameOver: Boolean get() = _gameOver.value
+    fun updateGameOver(value: Boolean) {
+        _gameOver.value = value
+    }
 
     private val _answerShown = mutableStateOf(false)
     val answerShown: Boolean get() = _answerShown.value
-
-    // Inicia el juego con un número específico de preguntas
-    fun startGame(questionCount: Int) {
-        _questions.clear()
-        _questions.addAll(allQuestions.shuffled().take(questionCount))
-        _totalQuestions.value = questionCount
-        currentQuestionIndex = 0
-        score = 0
-        _gameOver.value = false
-        _answerShown.value = false
+    fun updateAnswerShown(value: Boolean) {
+        _answerShown.value = value
     }
 
-    // Envía la respuesta seleccionada por el usuario
-    fun submitAnswer(selectedIndex: Int) {
-        val currentQuestion = questions[currentQuestionIndex]
+    private val gameFunctions = GameFunctions(this)
 
-        if (!_answerShown.value) {
-            if (selectedIndex == currentQuestion.correctAnswerIndex) {
-                score++
-            }
-            _answerShown.value = true
-        }
-    }
-
-    // Avanza a la siguiente pregunta o finaliza el juego
-    fun moveToNextQuestion() {
-        if (currentQuestionIndex < questions.lastIndex) {
-            currentQuestionIndex++
-        } else {
-            _gameOver.value = true
-            checkAndUpdateRecord() // Actualiza el récord al final del juego
-        }
-        _answerShown.value = false
-    }
-
-    // Método público para actualizar el récord
-    fun checkAndUpdateRecord(percentage: Int = (score * 100 / totalQuestions).coerceAtLeast(0)) {
-        if (percentage > _record.value) {
-            _record.value = percentage
-        }
-    }
+    // Llamada a funciones del juego
+    fun startGame(questionCount: Int) = gameFunctions.startGame(questionCount)
+    fun submitAnswer(selectedIndex: Int) = gameFunctions.submitAnswer(selectedIndex)
+    fun moveToNextQuestion() = gameFunctions.moveToNextQuestion()
+    fun checkAndUpdateRecord(percentage: Int = (score * 100 / totalQuestions).coerceAtLeast(0)) = gameFunctions.checkAndUpdateRecord(percentage)
 }
+
+
+
 
 
 
